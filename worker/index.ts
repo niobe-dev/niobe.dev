@@ -15,6 +15,12 @@
 // `public/_headers`, so they also cover what the worker never sees.
 
 const SITE = "niobe.dev";
+
+const GERMAN_LEGAL_NAMES: Record<string, string> = {
+  "/impressum": "/legal-notice",
+  "/datenschutz": "/privacy",
+  "/datenschutzerklaerung": "/privacy",
+};
 const REPO = "niobe-dev/niobe";
 const RELEASES = `https://github.com/${REPO}/releases`;
 
@@ -36,6 +42,14 @@ export default {
     // hostnames. The path and the query are kept.
     if (url.hostname === `www.${SITE}`) {
       url.hostname = SITE;
+      return Response.redirect(url.toString(), 301);
+    }
+
+    // The statutory pages are named in English, but a German reader — or an
+    // authority checking the site — looks for these two.
+    const german = GERMAN_LEGAL_NAMES[url.pathname];
+    if (german) {
+      url.pathname = german;
       return Response.redirect(url.toString(), 301);
     }
 

@@ -57,6 +57,7 @@ src/
   layouts/          Base (head, meta, icons) and Docs (bar, sidebar, table of contents)
   components/       Nav, Footer, Backdrop, Terminal, InstallCommand, Version
   content/docs/     the documentation, one markdown file per page
+  content/legal/    the legal notice and the privacy policy
   content.config.ts the frontmatter schema and the order the sections are drawn in
   lib/              site constants, the GitHub release reader, the doc ordering
   styles/           global.css (tokens and chrome), prose.css (rendered markdown), fonts.css
@@ -122,7 +123,38 @@ avoids.
 - **No roadmap language.** Describe what exists. "Not implemented yet: the codex bridge does
   not spawn the CLI" is fine; "coming soon" is not.
 
-## 7. Design
+## 7. The statutory pages
+
+`src/content/legal/` holds the legal notice and the privacy policy. They are
+statutory documents, not marketing copy, and two rules govern them.
+
+**The privacy policy has to stay true.** It states that the site sets no
+cookies, stores nothing on the device, and makes no request to any third party.
+Every one of those is a property of the code, not a promise about it. Adding an
+analytics snippet, a hosted font, an embedded video, a `localStorage` call or a
+`fetch` to another origin makes the page false the moment it deploys — so a
+change like that updates the policy in the same commit, or it does not land.
+The content security policy in `public/_headers` is the backstop: it forbids
+those requests outright.
+
+**The postal address and the email address are obfuscated, deliberately.** Both
+are written with hidden decoy spans:
+
+```html
+<a class="mail">slavik&#64;<span aria-hidden="true" style="display:none">nospam-</span>slavikdev&#46;com</a>
+```
+
+What a scraper lifts out of the HTML is `slavik@nospam-slavikdev.com`, which is
+not an address anyone reads; what a person sees, copies and hears is the real
+one. The `style` is an attribute rather than a class so that it holds even if
+the stylesheet does not load, and there is no `mailto:` anywhere in the built
+output — the link's `href` is assembled in the browser by the script in
+`src/layouts/Legal.astro`, from the visible text minus the decoy.
+
+Do not "tidy" this into a plain `mailto:`, and do not hard-code the address
+anywhere else. If a page needs to show it, copy the markup above.
+
+## 8. Design
 
 The palette is the shell's own, defined once as custom properties at the top of
 `src/styles/global.css`. Use the tokens; do not write a hex value into a component.
@@ -138,7 +170,7 @@ The palette is the shell's own, defined once as custom properties at the top of
   security policy in `public/_headers` can forbid inline script. A change that reintroduces
   an inline `<script>` breaks the policy and must not land.
 
-## 8. Copyright headers
+## 9. Copyright headers
 
 Every file that can carry a comment starts with the SPDX header:
 
@@ -152,12 +184,12 @@ Copyright (c) Viacheslav Shynkarenko
 `LICENSE`, `CLAUDE.md`, `package.json`, `tsconfig.json`, `*.md` under `src/content/` (the
 frontmatter is the file's head), and anything generated into `public/` or `dist/`.
 
-## 9. No internal planning references
+## 10. No internal planning references
 
 This repository is public. No milestone markers, task or phase numbers, ticket ids, or links
 to private documents — in the pages, the code, the comments, or the commit messages.
 
-## 10. Landing the work
+## 11. Landing the work
 
 `npm run build` and `npm run check` green, then stage exactly the files you touched, by name,
 then commit. Conventional Commits (`feat:`, `fix:`, `docs:`, `style:`, `chore:`). The subject

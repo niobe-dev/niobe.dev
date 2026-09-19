@@ -1,0 +1,120 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) Viacheslav Shynkarenko
+import Base from "./Base.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import { readableDate } from "../lib/release";
+import "../styles/legal.css";
+
+interface Props {
+  title: string;
+  description: string;
+  /// The other statutory page, linked at the top so the two are one pair.
+  siblingHref: string;
+  siblingTitle: string;
+  updated: Date;
+}
+
+const { title, description, siblingHref, siblingTitle, updated } = Astro.props;
+---
+
+<Base title={title} description={description}>
+  <div class="page">
+    <Nav />
+
+    <main id="main" class="shell wrap">
+      <header class="head">
+        <div class="eyebrow">Legal</div>
+        <h1>{title}</h1>
+        <p class="head__lede">{description}</p>
+      </header>
+
+      <article class="legal">
+        <slot />
+      </article>
+
+      <footer class="end">
+        <p>Last updated: {readableDate(updated.toISOString())}.</p>
+        <a href={siblingHref}>{siblingTitle} →</a>
+      </footer>
+    </main>
+
+    <Footer />
+  </div>
+</Base>
+
+<script>
+  // The address is never written into the page as something a scraper can
+  // lift. What is in the HTML reads `slavik@nospam-slavikdev.com`, and the
+  // `nospam-` is a span that is hidden from the eye, from a screen reader and
+  // from a copied selection. Dropping it here gives the real address, which
+  // then becomes the link's target.
+  //
+  // With JavaScript off the address is still on the page and still correct;
+  // it is simply not clickable, which is the same trade every obfuscated
+  // address makes.
+  for (const link of document.querySelectorAll<HTMLAnchorElement>("a.mail")) {
+    const address = [...link.childNodes]
+      .filter(
+        (node) =>
+          !(node instanceof HTMLElement && node.getAttribute("aria-hidden") === "true"),
+      )
+      .map((node) => node.textContent ?? "")
+      .join("")
+      .trim();
+
+    if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(address)) link.href = `mailto:${address}`;
+  }
+</script>
+
+<style>
+  .page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .wrap {
+    flex: 1;
+    padding-bottom: 80px;
+  }
+
+  .head {
+    padding-block: clamp(36px, 6vw, 56px) 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-start;
+    max-width: 74ch;
+  }
+
+  .head h1 {
+    font-size: clamp(30px, 5vw, 46px);
+    line-height: 1.05;
+  }
+
+  .head__lede {
+    color: var(--muted);
+    font-size: 17px;
+    line-height: 1.55;
+  }
+
+  .end {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    max-width: 74ch;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: baseline;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--dim);
+  }
+
+  .end a {
+    margin-left: auto;
+  }
+</style>

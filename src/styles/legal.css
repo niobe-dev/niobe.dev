@@ -1,0 +1,96 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* Copyright (c) Viacheslav Shynkarenko */
+
+/* The rendered markdown of a statutory page. One column, wide line length, no
+   ornament: these are read to check a fact, not to be enjoyed. */
+
+.legal {
+  min-width: 0;
+  max-width: 74ch;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.legal h2 {
+  font-size: 21px;
+  color: var(--fg);
+  margin-top: 26px;
+  scroll-margin-top: 90px;
+}
+
+.legal h2 em {
+  color: var(--dim);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.legal strong {
+  color: var(--fg);
+}
+
+.legal a {
+  color: var(--green);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(57, 255, 122, 0.4);
+}
+
+.legal a:hover {
+  color: var(--yellow);
+  text-decoration-color: currentColor;
+}
+
+.legal ul {
+  margin: 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.legal li::marker {
+  color: var(--dim);
+}
+
+.legal code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  color: var(--term-fg);
+  background: rgba(57, 255, 122, 0.08);
+  border: 1px solid rgba(57, 255, 122, 0.14);
+  padding: 1px 5px;
+}
+
+.legal hr {
+  margin-block: 14px;
+  border-top-color: var(--rule);
+}
+
+/* The postal address, which is a block of lines rather than a sentence. */
+.legal .address {
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--fg);
+  border-left: 2px solid var(--green);
+  padding: 2px 0 2px 16px;
+}
+
+/* The address is assembled by the script in the legal layout, which is also
+   what makes it a link. Until then it is text, and still readable. */
+.legal .mail {
+  font-family: var(--mono);
+  font-size: 0.94em;
+  white-space: nowrap;
+}
+
+.legal .mail:not([href]) {
+  color: var(--term-fg);
+  text-decoration: none;
+  cursor: text;
+  user-select: all;
+}

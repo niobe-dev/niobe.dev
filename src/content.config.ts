@@ -20,4 +20,17 @@ const docs = defineCollection({
   }),
 });
 
-export const collections = { docs };
+/// The two statutory pages. They are a collection rather than two `.astro`
+/// files so the prose stays markdown and the layout stays one file.
+const legal = defineCollection({
+  loader: glob({ base: "./src/content/legal", pattern: "**/*.md" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    /// Shown at the foot of the page. A statutory notice that does not say
+    /// when it last changed is hard to rely on.
+    updated: z.date(),
+  }),
+});
+
+export const collections = { docs, legal };
