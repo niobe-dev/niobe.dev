@@ -1,0 +1,674 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) Viacheslav Shynkarenko
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import Backdrop from "../components/Backdrop.astro";
+import Terminal from "../components/Terminal.astro";
+import InstallCommand from "../components/InstallCommand.astro";
+import Version from "../components/Version.astro";
+import { site } from "../lib/site";
+import { releases, readableDate } from "../lib/release";
+
+const published = await releases();
+const latest = published[0] ?? null;
+
+/// The first paragraph of a release's notes, for the card on the front page.
+function opening(notes: string): string {
+  const line = notes
+    .split("\n")
+    .map((l) => l.trim())
+    .find((l) => l.length > 0 && !l.startsWith("#") && !l.startsWith("<!--"));
+  if (!line) return "Binaries for macOS and Linux, with checksums and the installer.";
+  return line.length > 150 ? `${line.slice(0, 149).trimEnd()}…` : line;
+}
+
+const features = [
+  {
+    index: "01",
+    label: "See the work",
+    colour: "green",
+    title: "Every read, edit and command, as it happens",
+    body: "The session pane is the running record: the files opened, the diffs applied, the commands run and what they exited with, the sub-agents still going. Watch it, or read it after.",
+  },
+  {
+    index: "02",
+    label: "See the why",
+    colour: "pink",
+    title: "The reasons beside the diff",
+    body: "Changed files carry the reason they were changed, and the decisions pane keeps what was chosen and what was deliberately left alone. Review the reasoning as fast as the code.",
+  },
+  {
+    index: "03",
+    label: "See the cost",
+    colour: "yellow",
+    title: "Every figure measured, or labelled",
+    body: "Tokens in, out and read from cache, priced from a dated table bundled with the binary. A number the backend reported is marked API-equivalent; a model the table does not list reads unpriced. Nothing is guessed.",
+  },
+  {
+    index: "04",
+    label: "Stay in charge",
+    colour: "green",
+    title: "Permissions you answer once",
+    body: "Stop for every call, stop for none, or plan without touching anything. An “always” answer becomes a rule in the repository's config, and answers the same prompt in every session after.",
+  },
+] as const;
+
+const modes = [
+  {
+    when: "Read and reason, change nothing",
+    name: "plan",
+    colour: "pink",
+    body: "The backend works through the problem and proposes. Nothing is applied.",
+  },
+  {
+    when: "Shift+Tab cycles",
+    name: "ask",
+    colour: "yellow",
+    body: "Every call no rule already allows stops for you. y, n, a for always, p for this target.",
+  },
+  {
+    when: "When you trust the run",
+    name: "auto",
+    colour: "green",
+    body: "The backend decides. The session pane still shows every call it made.",
+  },
+] as const;
+---
+
+<Base
+  title="Niobe — AI coding at full speed, without the black box"
+  description={`${site.tagline} Niobe drives the official claude CLI as a subprocess, so it runs on the subscription it is already signed in with. Open source, ${site.license}, no telemetry.`}
+  bare
+>
+  <div class="page">
+    <Backdrop />
+    <Nav />
+
+    <main id="main">
+      <header class="hero shell">
+        <div class="eyebrow">
+          <span class="dot" aria-hidden="true"></span>
+          Open source · {site.license} · <Version tag={latest?.tag ?? null} />
+        </div>
+
+        <h1 class="hero__title">
+          AI coding at full speed.<br />
+          <span class="hero__glow">Without the black box.</span>
+        </h1>
+
+        <p class="hero__lede">
+          Niobe is a terminal coding agent that keeps you aware of what is being built and
+          how: what it did, what it decided, what it touched, what it is doing right now and
+          what it cost — visible while it happens. You stay on the loop instead of in it.
+        </p>
+
+        <div class="hero__actions">
+          <InstallCommand />
+          <a class="button" href="/docs">Read the docs →</a>
+        </div>
+
+        <ul class="badges">
+          <li>Drives the <code>claude</code> CLI</li>
+          <li>macOS · Linux</li>
+          <li>Single static binary</li>
+          <li class="badges--green">{site.license}</li>
+          <li class="badges--yellow">No telemetry</li>
+        </ul>
+      </header>
+
+      <section class="demo shell" aria-label="The shell">
+        <Terminal version={latest?.tag ?? null} />
+        <p class="demo__note">
+          The shell as it draws itself. The session in it is an illustration — in a real one
+          every figure on screen is measured, or says what it is instead.
+        </p>
+      </section>
+
+      <section class="idea shell">
+        <div>
+          <div class="eyebrow">The idea</div>
+          <h2 class="idea__title">
+            Full speed.<br /><span class="muted">Full awareness.</span>
+          </h2>
+        </div>
+        <p class="idea__body">
+          An agent that works out of sight asks you to take its word for everything, and the
+          only way back into the loop is to approve every step — which costs you the speed you
+          came for. Niobe shows the work instead: the calls, the reasons, the files, the
+          bill. Control comes from seeing clearly, so it is built in rather than bolted on.
+        </p>
+      </section>
+
+      <section id="features" class="features shell">
+        {
+          features.map((feature) => (
+            <article class="card">
+              <div class:list={["card__label", `card__label--${feature.colour}`]}>
+                {feature.index} / {feature.label}
+              </div>
+              <b class="card__title">{feature.title}</b>
+              <p class="card__body">{feature.body}</p>
+            </article>
+          ))
+        }
+      </section>
+
+      <section class="modes shell" aria-label="Modes">
+        <div class="modes__grid">
+          {
+            modes.map((mode) => (
+              <div class="modes__cell">
+                <div class="modes__when">{mode.when}</div>
+                <b class:list={["modes__name", `modes__name--${mode.colour}`]}>{mode.name}</b>
+                <p class="modes__body">{mode.body}</p>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="bridge shell">
+        <div class="bridge__lead">
+          <div class="eyebrow">Bridge-first</div>
+          <h2 class="bridge__title">Your subscription, untouched.</h2>
+          <p class="bridge__body">
+            Niobe drives the official <code>claude</code> CLI as a subprocess, with your
+            repository as its working directory. Whatever that binary is signed in as is what
+            the session runs on — there is no key to paste and no second place your
+            credentials live.
+          </p>
+        </div>
+        <ul class="bridge__points">
+          <li>
+            <b>Only the official binaries touch credentials.</b>
+            Niobe never reads their token files and never sets their user agent. No extraction,
+            no spoofing.
+          </li>
+          <li>
+            <b>No telemetry.</b>
+            Network calls go to the configured provider and to the CLIs. Nothing else, ever.
+          </li>
+          <li>
+            <b>Your sessions stay yours.</b>
+            Every event is recorded append-only into <code>.niobe/sessions.db</code> in the
+            repository, and a session started in plain Claude Code can be carried on here.
+          </li>
+          <li class="bridge__note">
+            The codex bridge and the native agent loop do not spawn a process yet; a session
+            under one of those profiles has nowhere to send a prompt, and says so.
+          </li>
+        </ul>
+      </section>
+
+      <section class="cta shell">
+        <div class="cta__panel">
+          <div class="cta__left">
+            <h2 class="cta__title">Jacked in<br />in sixty seconds.</h2>
+            <p class="cta__body">
+              One static binary, no runtime, nothing to sign up for. The installer checks the
+              archive against its published SHA-256, puts <code>niobe</code> in{" "}
+              <code>~/.local/bin</code>, and edits none of your shell files.
+            </p>
+            <a class="cta__link" href="/docs/installation">Installation guide →</a>
+          </div>
+          <div class="cta__steps">
+            <div><span class="cta__sigil">$</span>curl -fsSL https://niobe.dev/install.sh | sh</div>
+            <div><span class="cta__sigil">$</span>cd my-project</div>
+            <div><span class="cta__sigil">$</span>niobe</div>
+          </div>
+        </div>
+      </section>
+
+      {
+        published.length > 0 && (
+          <section class="releases shell">
+            <div class="releases__head">
+              <h2 class="releases__title">Releases</h2>
+              <a href="/changelog">All releases →</a>
+            </div>
+            <div class="releases__grid">
+              {published.slice(0, 3).map((release) => (
+                <a class="release" href={`/changelog#${release.tag}`}>
+                  <span class="release__date">{readableDate(release.publishedAt)}</span>
+                  <b class="release__name">{release.name}</b>
+                  <span class="release__body">{opening(release.notes)}</span>
+                </a>
+              ))}
+            </div>
+          </section>
+        )
+      }
+    </main>
+
+    <Footer />
+  </div>
+</Base>
+
+<style>
+  .page {
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+  }
+
+  main {
+    position: relative;
+    z-index: 2;
+  }
+
+  .muted {
+    color: var(--dim);
+  }
+
+  code {
+    color: var(--term-fg);
+    font-size: 0.92em;
+  }
+
+  .button {
+    display: flex;
+    align-items: center;
+    padding: 16px 22px;
+    background: var(--pink);
+    color: #0b0208;
+    font-weight: 700;
+    box-shadow: 0 0 30px rgba(255, 45, 200, 0.4);
+    white-space: nowrap;
+  }
+
+  .button:hover {
+    color: #0b0208;
+    background: #ff53d3;
+  }
+
+  /* ── Hero ─────────────────────────────────────────────────────────────── */
+
+  .hero {
+    padding-block: clamp(48px, 8vw, 72px) 56px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    align-items: flex-start;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    background: var(--pink);
+    box-shadow: 0 0 10px var(--pink);
+  }
+
+  .hero__title {
+    font-size: clamp(40px, 7vw, 84px);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    /* The line break in the markup is the one that matters; this only keeps
+       the first line from running the full width of a wide window. */
+    max-width: 960px;
+    text-wrap: pretty;
+  }
+
+  .hero__glow {
+    color: var(--green);
+    text-shadow:
+      0 0 30px rgba(57, 255, 122, 0.8),
+      0 0 2px #fff;
+  }
+
+  .hero__lede {
+    font-size: clamp(17px, 2vw, 19px);
+    line-height: 1.55;
+    color: var(--muted);
+    max-width: 66ch;
+  }
+
+  .hero__actions {
+    display: flex;
+    gap: 14px;
+    align-items: stretch;
+    flex-wrap: wrap;
+    max-width: 100%;
+  }
+
+  .badges {
+    display: flex;
+    gap: clamp(16px, 3vw, 32px);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--dim);
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .badges code {
+    font-size: 1em;
+    color: inherit;
+  }
+
+  .badges--green {
+    color: var(--green);
+  }
+
+  .badges--yellow {
+    color: var(--yellow);
+  }
+
+  /* ── Demo ─────────────────────────────────────────────────────────────── */
+
+  .demo {
+    padding-bottom: 20px;
+  }
+
+  .demo__note {
+    margin-top: 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--dim);
+    max-width: 80ch;
+  }
+
+  /* ── The idea ─────────────────────────────────────────────────────────── */
+
+  .idea {
+    padding-block: 52px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: clamp(24px, 5vw, 48px);
+    align-items: start;
+  }
+
+  .idea__title {
+    margin-top: 16px;
+    font-size: clamp(30px, 4vw, 36px);
+    line-height: 1.05;
+  }
+
+  .idea__body {
+    color: var(--muted);
+    font-size: 17px;
+    line-height: 1.6;
+  }
+
+  /* ── Features ─────────────────────────────────────────────────────────── */
+
+  .features {
+    padding-bottom: 72px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    padding: 28px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card__label {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .card__label--green {
+    color: var(--green);
+  }
+
+  .card__label--pink {
+    color: var(--pink);
+  }
+
+  .card__label--yellow {
+    color: var(--yellow);
+  }
+
+  .card__title {
+    font-size: 21px;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .card__body {
+    color: var(--muted);
+    line-height: 1.55;
+    font-size: 14.5px;
+  }
+
+  /* ── Modes ────────────────────────────────────────────────────────────── */
+
+  .modes {
+    padding-bottom: 72px;
+  }
+
+  .modes__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .modes__cell {
+    background: var(--page);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .modes__when {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--term-dim);
+  }
+
+  .modes__name {
+    font-family: var(--mono);
+    font-size: 19px;
+  }
+
+  .modes__name--green {
+    color: var(--green);
+  }
+
+  .modes__name--yellow {
+    color: var(--yellow);
+  }
+
+  .modes__name--pink {
+    color: var(--pink);
+  }
+
+  .modes__body {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── Bridge ───────────────────────────────────────────────────────────── */
+
+  .bridge {
+    padding-bottom: 72px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: clamp(28px, 5vw, 56px);
+    align-items: start;
+  }
+
+  .bridge__title {
+    margin-block: 16px 14px;
+    font-size: clamp(28px, 3.6vw, 36px);
+  }
+
+  .bridge__body {
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .bridge__points {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bridge__points li {
+    padding: 18px 0;
+    border-top: 1px solid var(--rule);
+    color: var(--muted);
+    font-size: 14.5px;
+    line-height: 1.55;
+  }
+
+  .bridge__points li:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .bridge__points b {
+    display: block;
+    color: var(--fg);
+    font-size: 15.5px;
+    margin-bottom: 4px;
+  }
+
+  .bridge__note {
+    color: var(--dim);
+    font-style: italic;
+  }
+
+  /* ── Closing panel ────────────────────────────────────────────────────── */
+
+  .cta {
+    padding-bottom: 72px;
+  }
+
+  .cta__panel {
+    padding: clamp(28px, 5vw, 56px);
+    border: 1px solid rgba(57, 255, 122, 0.35);
+    background: linear-gradient(
+      135deg,
+      rgba(57, 255, 122, 0.08),
+      rgba(255, 45, 200, 0.08)
+    );
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 40px;
+    align-items: center;
+  }
+
+  .cta__left {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .cta__title {
+    font-size: clamp(30px, 4vw, 40px);
+    line-height: 1;
+  }
+
+  .cta__body {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .cta__link {
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .cta__steps {
+    font-family: var(--mono);
+    font-size: clamp(12.5px, 1.5vw, 14px);
+    line-height: 2;
+    background: var(--term-bg);
+    border: 1px solid var(--term-rule);
+    padding: 20px 24px;
+    color: var(--term-fg);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .cta__sigil {
+    color: var(--green);
+    margin-right: 10px;
+  }
+
+  /* ── Releases ─────────────────────────────────────────────────────────── */
+
+  .releases {
+    padding-bottom: 56px;
+  }
+
+  .releases__head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .releases__title {
+    font-size: 28px;
+  }
+
+  .releases__head a {
+    margin-left: auto;
+    color: var(--dim);
+    font-size: 14px;
+  }
+
+  .releases__head a:hover {
+    color: var(--green);
+  }
+
+  .releases__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  .release {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 24px;
+    border: 1px solid var(--rule);
+    color: inherit;
+  }
+
+  .release:hover {
+    border-color: var(--green);
+    color: inherit;
+  }
+
+  .release__date {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--pink);
+  }
+
+  .release__name {
+    font-size: 17px;
+    line-height: 1.3;
+  }
+
+  .release__body {
+    font-size: 14px;
+    color: var(--dim);
+    line-height: 1.5;
+  }
+</style>

@@ -1,0 +1,16 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) Viacheslav Shynkarenko
+import { site } from "../lib/site";
+---
+
+<footer class="foot shell">
+  <span style="color: var(--fg)">{site.domain}</span>
+  <span>{site.license}</span>
+  <a href={site.repoUrl} rel="noopener">GitHub</a>
+  <a href={site.issuesUrl} rel="noopener">Issues</a>
+  <a href="/docs">Docs</a>
+  <a href="/changelog">Changelog</a>
+  <a href="/releases.xml">Releases feed</a>
+  <span class="foot__end">wake up.</span>
+</footer>

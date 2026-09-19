@@ -1,0 +1,82 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) Viacheslav Shynkarenko
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<Base
+  title="Not found"
+  description="That page is not here."
+>
+  <div class="page">
+    <Nav />
+    <main id="main" class="shell lost">
+      <div class="eyebrow">404</div>
+      <h1>There is no page here.</h1>
+      <p>
+        The link may be old, or the path may be a typo. The documentation index is a good
+        place to pick the thread back up.
+      </p>
+      <div class="lost__links">
+        <a href="/docs">Documentation →</a>
+        <a href="/">Home →</a>
+        <a href="/changelog">Changelog →</a>
+      </div>
+      <pre class="lost__term"><span>$</span> niobe --resume 404
+niobe: no session 404: nothing has been recorded here</pre>
+    </main>
+    <Footer />
+  </div>
+</Base>
+
+<style>
+  .page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .lost {
+    flex: 1;
+    padding-block: clamp(48px, 10vw, 100px) 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-items: flex-start;
+  }
+
+  .lost h1 {
+    font-size: clamp(32px, 6vw, 52px);
+  }
+
+  .lost p {
+    color: var(--muted);
+    max-width: 55ch;
+  }
+
+  .lost__links {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-size: 15px;
+  }
+
+  .lost__term {
+    margin: 12px 0 0;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--term-fg);
+    background: var(--term-bg);
+    border: 1px solid var(--term-rule);
+    padding: 16px 20px;
+    overflow-x: auto;
+  }
+
+  .lost__term span {
+    color: var(--green);
+    margin-right: 8px;
+  }
+</style>

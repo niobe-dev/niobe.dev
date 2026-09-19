@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) Viacheslav Shynkarenko
+#
+# One name for the site: the apex is canonical and www is a redirect, so a page
+# is not indexed twice under two hostnames.
+
+https://www.niobe.dev/* https://niobe.dev/:splat 301

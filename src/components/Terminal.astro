@@ -1,0 +1,601 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) Viacheslav Shynkarenko
+
+// The shell, drawn in HTML.
+//
+// The panes, their order, the menu, the status line, the function keys and the
+// wording are the ones `niobe-tui` draws — a reader who installs it should
+// recognise the screen. The session in it is a plausible one, not a recording,
+// so no figure here is presented as something measured: the page says so
+// beneath it.
+
+interface Props {
+  version: string | null;
+}
+
+const { version } = Astro.props;
+
+const menus = ["Niobe", "Session", "Files", "Tools", "Cost", "Options", "Help"];
+const fkeys: [string, string][] = [
+  ["1", "Help"],
+  ["2", "Plan"],
+  ["3", "Diff"],
+  ["4", "Undo"],
+  ["5", "Cost"],
+  ["6", "Files"],
+  ["7", "Tools"],
+  ["8", "Model"],
+  ["9", "Theme"],
+  ["10", "Quit"],
+];
+---
+
+<div class="tui" role="img" aria-label="The Niobe shell: a session pane on the left with the transcript and a permission prompt, and Cost, Parallel and Changes panes on the right.">
+  <span class="tui__corner tui__corner--tl" aria-hidden="true"></span>
+  <span class="tui__corner tui__corner--br" aria-hidden="true"></span>
+
+  <div class="tui__menu">
+    <div class="tui__menu-left">
+      {menus.map((name) => (
+        <span><b>{name[0]}</b>{name.slice(1)}</span>
+      ))}
+    </div>
+    <div class="tui__menu-right">
+      <span class="dim">claude · opus-5</span>
+      <span>theme:<b>neo</b> F9</span>
+    </div>
+  </div>
+
+  <div class="tui__body">
+    <section class="pane pane--session">
+      <h3 class="pane__title">Session ─ niobe</h3>
+      <div class="pane__body tui__transcript">
+        <p class="e">
+          <span class="e__head"><span class="g g--user">&gt;</span> you<span class="dim"> · 14:02</span></span>
+          add etag support to the catalog fetcher so we stop re-downloading manifests that have not changed
+        </p>
+        <p class="e">
+          <span class="e__head"><span class="g g--agent">◆</span> claude · opus-5<span class="dim"> · 14:03 · $0.19 API-equivalent</span></span>
+          Keeping the etag per URL in the LRU the fetcher already has, sending <code>If-None-Match</code>, and treating a 304 as a cache hit. <code>fetch_manifest</code> keeps its signature.
+        </p>
+        <p class="e">
+          <span class="e__head"><span class="g g--tool">⚙</span> Edit<span class="dim"> · catalog/fetch.rs · +38 −9</span></span>
+        </p>
+        <div class="diff" aria-hidden="true">
+          <span class="diff__del">41 -    let res = client.get(url).send().await?;</span>
+          <span class="diff__add">41 +    let etag = self.etags.get(url);</span>
+          <span class="diff__add">42 +    let res = self.request(url, etag).await?;</span>
+          <span class="diff__add">43 +    if res.status() == StatusCode::NOT_MODIFIED &#123;</span>
+          <span class="diff__add">44 +        return self.cache.get(url).ok_or(Stale);</span>
+          <span class="diff__add">45 +    &#125;</span>
+        </div>
+        <p class="e">
+          <span class="e__head"><span class="g g--tool">⚙</span> Bash<span class="dim"> · cargo test -p catalog · 4.2s · exit 0</span></span>
+          <span class="ok">11 passed</span>
+        </p>
+      </div>
+
+      <div class="ask">
+        <div class="ask__title">the turn is waiting on you</div>
+        <div class="ask__what"><b>Bash</b> wants to run</div>
+        <div class="ask__target">“cargo clippy --workspace --all-targets”</div>
+        <div class="ask__answers">
+          <span class="ask__answer ask__answer--on">Yes, once</span>
+          <span class="ask__answer">Always Bash(cargo clippy *)</span>
+          <span class="ask__answer">Pin this</span>
+          <span class="ask__answer">No</span>
+        </div>
+        <div class="ask__keys dim">y allow · n deny · a always · p this target</div>
+      </div>
+
+      <div class="tui__composer">
+        <span class="g g--user">›</span>
+        <span class="tui__typed">now do the same for the image proxy</span><span class="caret"></span>
+      </div>
+    </section>
+
+    <div class="tui__side">
+      <section class="pane">
+        <h3 class="pane__title">Cost</h3>
+        <div class="pane__body">
+          <div class="tiles">
+            <div><span class="dim">session</span><b class="hot">$1.84</b></div>
+            <div><span class="dim">tokens in</span><b>412k</b></div>
+            <div><span class="dim">tokens out</span><b>18k</b></div>
+            <div><span class="dim">cache read</span><b>1.3M</b></div>
+          </div>
+          <div class="bars">
+            <div><span>Edit</span><b class="hot">6</b><i style="--fill: 100%"></i></div>
+            <div><span>Bash</span><b class="hot">4</b><i style="--fill: 67%"></i></div>
+            <div><span>Read</span><b class="hot">3</b><i style="--fill: 50%"></i></div>
+          </div>
+          <div class="dim">14 calls · 0 failed · 1 denied · 26 kB out</div>
+        </div>
+      </section>
+
+      <section class="pane">
+        <h3 class="pane__title">Parallel ─ 2 running</h3>
+        <div class="pane__body">
+          <div><span class="g g--agent">◆</span> tests for the 304 path</div>
+          <div><span class="g g--agent">◆</span> review catalog/cache.rs</div>
+          <div class="dim">3 spawned · peak 2 · 1 done · 0 failed</div>
+        </div>
+      </section>
+
+      <section class="pane pane--grow">
+        <h3 class="pane__title">Changes</h3>
+        <div class="pane__body">
+          <div class="pane__heading">Files ─ 3</div>
+          <div class="file"><span>▸ catalog/fetch.rs</span><b>+38 −9</b></div>
+          <div class="file__why dim">“etag kept in the LRU the fetcher had”</div>
+          <div class="file"><span>▸ catalog/cache.rs</span><b>+6 −2</b></div>
+          <div class="file"><span>▸ tests/fetch.rs</span><b>+41 —</b></div>
+
+          <div class="pane__heading">Decisions ─ 3</div>
+          <div class="decision">· reused the existing LRU rather than a second map, to keep one eviction policy</div>
+          <div class="decision">· kept fetch_manifest's signature; the etag is internal</div>
+          <div class="decision">· left the image proxy alone — asked first</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="tui__status">
+    <div class="tui__status-top">
+      <b class="hot">niobe</b><span class="sep">│</span>
+      <span class="agent">claude · opus-5</span><span class="sep">│</span>
+      <span class="tool">⎇ main</span><span class="sep">│</span>
+      <span>430k tokens</span><span class="sep">│</span>
+      <span>1 waiting on you</span><span class="sep">│</span>
+      <span>budget $1.84/$5.00</span>
+    </div>
+    <div class="tui__status-bottom">
+      <b class="hot">▸▸ ask mode</b><span class="dim"> · Shift+Tab cycles · F8 model · Enter send · F10 quit</span>
+    </div>
+  </div>
+
+  <div class="tui__fkeys">
+    {fkeys.map(([number, label]) => (
+      <span class="fkey"><b>{number}</b>{label}</span>
+    ))}
+    {version && <span class="fkey fkey--version">niobe {version}</span>}
+  </div>
+</div>
+
+<style>
+  .tui {
+    --t-frame: #1f7a3a;
+    --t-rule: #124a25;
+    --t-fg: #c9ffd6;
+    --t-bright: #39ff7a;
+    --t-dim: #3c8a55;
+    --t-mid: #6fd68a;
+    --t-light: #8fe0a5;
+    --t-white: #e9ffee;
+    --t-del: #ff6b6b;
+
+    position: relative;
+    border: 1px solid rgba(57, 255, 122, 0.4);
+    background: #020805;
+    color: var(--t-fg);
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    box-shadow:
+      0 0 60px rgba(57, 255, 122, 0.18),
+      0 30px 80px rgba(0, 0, 0, 0.6);
+  }
+
+  .tui__corner {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    z-index: 1;
+  }
+
+  .tui__corner--tl {
+    top: -1px;
+    left: -1px;
+    border-top: 2px solid var(--pink);
+    border-left: 2px solid var(--pink);
+  }
+
+  .tui__corner--br {
+    bottom: -1px;
+    right: -1px;
+    border-bottom: 2px solid var(--pink);
+    border-right: 2px solid var(--pink);
+  }
+
+  .dim {
+    color: var(--t-dim);
+  }
+
+  .hot {
+    color: var(--t-bright);
+  }
+
+  .agent {
+    color: var(--t-bright);
+  }
+
+  .tool {
+    color: var(--t-mid);
+  }
+
+  .ok {
+    color: var(--t-bright);
+  }
+
+  .g {
+    display: inline-block;
+    width: 1em;
+    font-weight: 700;
+  }
+
+  .g--user {
+    color: var(--t-light);
+  }
+
+  .g--agent {
+    color: var(--t-bright);
+  }
+
+  .g--tool {
+    color: var(--t-mid);
+  }
+
+  /* ── Menu ─────────────────────────────────────────────────────────────── */
+
+  .tui__menu {
+    display: flex;
+    gap: 18px;
+    padding: 4px 14px;
+    border-bottom: 1px solid var(--t-rule);
+    color: var(--t-mid);
+    flex-wrap: wrap;
+  }
+
+  .tui__menu-left {
+    display: flex;
+    gap: 16px;
+  }
+
+  .tui__menu-left b,
+  .tui__fkeys b {
+    color: var(--t-bright);
+    font-weight: 700;
+  }
+
+  .tui__menu-right {
+    margin-left: auto;
+    display: flex;
+    gap: 16px;
+  }
+
+  .tui__menu-right b {
+    color: var(--t-white);
+  }
+
+  /* ── Panes ────────────────────────────────────────────────────────────── */
+
+  .tui__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px;
+    align-items: start;
+  }
+
+  .tui__side {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .pane {
+    position: relative;
+    border: 3px double var(--t-frame);
+    padding: 12px 14px 12px;
+    min-width: 0;
+  }
+
+  .pane--session {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 100%;
+  }
+
+  .pane__title {
+    position: absolute;
+    top: -0.85em;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #020805;
+    padding-inline: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0;
+    color: var(--t-bright);
+    white-space: nowrap;
+  }
+
+  .pane__body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .pane__heading {
+    color: var(--t-bright);
+    font-weight: 700;
+    margin-top: 8px;
+  }
+
+  .pane__heading:first-child {
+    margin-top: 0;
+  }
+
+  /* ── Transcript ───────────────────────────────────────────────────────── */
+
+  .tui__transcript {
+    gap: 12px;
+  }
+
+  .e {
+    color: var(--t-fg);
+  }
+
+  .e__head {
+    display: block;
+    color: var(--t-white);
+  }
+
+  .e code {
+    color: var(--t-white);
+    font-size: 1em;
+  }
+
+  .diff {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--t-frame);
+    background: #041a0b;
+    padding: 8px 12px;
+    overflow: hidden;
+    white-space: pre;
+    text-overflow: ellipsis;
+  }
+
+  .diff span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .diff__add {
+    color: var(--t-bright);
+  }
+
+  .diff__del {
+    color: var(--t-del);
+    background: #2a0b0b;
+  }
+
+  /* ── The permission prompt ────────────────────────────────────────────── */
+
+  .ask {
+    border: 1px solid var(--t-bright);
+    padding: 10px 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 0 24px rgba(57, 255, 122, 0.15);
+  }
+
+  .ask__title {
+    align-self: flex-start;
+    background: var(--t-bright);
+    color: #021;
+    font-weight: 700;
+    padding-inline: 6px;
+    margin-top: -18px;
+  }
+
+  .ask__what b {
+    color: var(--t-white);
+  }
+
+  .ask__target {
+    color: var(--t-light);
+    font-style: italic;
+  }
+
+  .ask__answers {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .ask__answer {
+    border: 1px solid var(--t-frame);
+    padding: 1px 8px;
+    color: var(--t-light);
+  }
+
+  .ask__answer--on {
+    border-color: var(--t-bright);
+    background: var(--t-bright);
+    color: #021;
+    font-weight: 700;
+  }
+
+  /* ── Composer ─────────────────────────────────────────────────────────── */
+
+  .tui__composer {
+    margin-top: auto;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    border-top: 1px solid var(--t-rule);
+    padding-top: 10px;
+  }
+
+  .tui__typed {
+    color: var(--t-white);
+  }
+
+  .caret {
+    display: inline-block;
+    width: 7px;
+    height: 14px;
+    background: var(--t-bright);
+    vertical-align: -2px;
+    animation: blink 1s steps(1) infinite;
+  }
+
+  /* ── Cost ─────────────────────────────────────────────────────────────── */
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2px 8px;
+  }
+
+  .tiles div {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .tiles b {
+    font-size: 17px;
+    color: var(--t-white);
+  }
+
+  .tiles b.hot {
+    color: var(--t-bright);
+  }
+
+  .bars {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .bars div {
+    display: grid;
+    grid-template-columns: 5.5em 2em minmax(0, 1fr);
+    align-items: center;
+    gap: 6px;
+  }
+
+  .bars b {
+    color: var(--t-bright);
+    text-align: right;
+  }
+
+  .bars i {
+    height: 2px;
+    width: var(--fill);
+    max-width: 90px;
+    background: var(--t-mid);
+  }
+
+  /* ── Changes ──────────────────────────────────────────────────────────── */
+
+  .file {
+    display: flex;
+    gap: 10px;
+  }
+
+  .file b {
+    margin-left: auto;
+    color: var(--t-white);
+    white-space: nowrap;
+  }
+
+  .file__why {
+    font-style: italic;
+    padding-left: 14px;
+  }
+
+  .decision {
+    color: var(--t-fg);
+  }
+
+  /* ── Status and function keys ─────────────────────────────────────────── */
+
+  .tui__status {
+    border-top: 1px solid var(--t-rule);
+    padding: 6px 14px;
+    color: var(--t-light);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tui__status-top {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .sep {
+    color: var(--t-dim);
+  }
+
+  .tui__fkeys {
+    display: flex;
+    gap: 1px;
+    background: var(--t-rule);
+    border-top: 1px solid var(--t-rule);
+    overflow: hidden;
+  }
+
+  .fkey {
+    flex: 1 1 0;
+    min-width: 0;
+    background: #041a0b;
+    padding: 3px 6px;
+    color: var(--t-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .fkey b {
+    margin-right: 4px;
+  }
+
+  .fkey--version {
+    flex: 0 0 auto;
+    color: var(--t-dim);
+  }
+
+  @media (max-width: 900px) {
+    .tui {
+      font-size: 11.5px;
+    }
+
+    .tui__body {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tiles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 620px) {
+    .tui__menu-left span:nth-child(n + 4),
+    .tui__menu-right span:first-child,
+    .fkey:nth-child(n + 6) {
+      display: none;
+    }
+  }
+</style>

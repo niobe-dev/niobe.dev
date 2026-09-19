@@ -1,0 +1,52 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) Viacheslav Shynkarenko
+
+// The published version, baked in at build time and corrected in the browser.
+//
+// A static page goes stale the moment a release is tagged, and the site is not
+// rebuilt on someone else's push. So every place that names a version is
+// marked, and one request to `/api/release` — which the worker answers from
+// GitHub — brings them all up to date. A reader with no JavaScript sees the
+// version the site was built with, which is the worst case, not the usual one.
+
+interface Props {
+  /// The tag the site was built against, `v0.3.0`, or null when the build
+  /// could not reach GitHub.
+  tag: string | null;
+  /// What to show until the browser knows better.
+  fallback?: string;
+}
+
+const { tag, fallback = "latest" } = Astro.props;
+---
+
+<span data-niobe-version>{tag ?? fallback}</span>
+
+<script>
+  interface LatestRelease {
+    tag: string;
+    version: string;
+    url: string;
+  }
+
+  const shown = document.querySelectorAll<HTMLElement>("[data-niobe-version]");
+  if (shown.length > 0) {
+    try {
+      const response = await fetch("/api/release", { headers: { accept: "application/json" } });
+      if (response.ok) {
+        const release = (await response.json()) as LatestRelease;
+        if (release.tag) {
+          for (const element of shown) element.textContent = release.tag;
+          for (const link of document.querySelectorAll<HTMLAnchorElement>(
+            "[data-niobe-release-link]",
+          )) {
+            link.href = release.url;
+          }
+        }
+      }
+    } catch {
+      // The page already names a version, or says `latest`. Either is fine.
+    }
+  }
+</script>

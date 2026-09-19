@@ -1,0 +1,217 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* Copyright (c) Viacheslav Shynkarenko */
+
+/* The rendered markdown of a documentation page. Every rule is under `.doc`,
+   because the markdown arrives as a slot and a scoped style cannot reach it. */
+
+.doc {
+  min-width: 0;
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: var(--term-fg);
+  display: flex;
+  flex-direction: column;
+  /* The rhythm is the column gap, not a margin on each element: a margin gets
+     out-specified by any rule that zeroes one (`.doc pre`, `.doc ul`), and two
+     code blocks in a row then touch. What follows only adds to this. */
+  gap: 18px;
+}
+
+.doc h1 {
+  font-size: clamp(32px, 5vw, 44px);
+  line-height: 1.05;
+  color: var(--term-white);
+}
+
+.doc h2 {
+  font-size: 24px;
+  color: var(--term-white);
+  margin-top: 26px;
+  scroll-margin-top: 90px;
+}
+
+.doc h3 {
+  font-size: 18px;
+  color: var(--term-white);
+  margin-top: 10px;
+  scroll-margin-top: 90px;
+}
+
+/* A link to the heading, added by the script in the docs layout and shown only
+   while the heading is hovered or the link itself has focus, so a permalink
+   glyph does not sit in the text all the time. */
+.doc__anchor {
+  color: var(--term-dim);
+  margin-left: 8px;
+  font-weight: 400;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.doc :is(h2, h3):hover .doc__anchor,
+.doc__anchor:focus-visible {
+  opacity: 1;
+}
+
+.doc p,
+.doc li {
+  text-wrap: pretty;
+}
+
+.doc strong {
+  color: var(--term-white);
+}
+
+.doc ul,
+.doc ol {
+  margin-block: 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.doc li::marker {
+  color: var(--term-dim);
+}
+
+.doc li > ul,
+.doc li > ol {
+  margin-top: 6px;
+}
+
+.doc code {
+  font-size: 0.9em;
+  color: var(--term-white);
+  background: rgba(57, 255, 122, 0.08);
+  border: 1px solid rgba(57, 255, 122, 0.14);
+  padding: 1px 5px;
+  white-space: nowrap;
+}
+
+.doc pre {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--term-edge);
+  overflow-x: auto;
+  font-size: 13.5px;
+  line-height: 1.7;
+  box-shadow: 0 0 24px rgba(57, 255, 122, 0.08);
+}
+
+/* Shiki paints the block; the terminal black is the one the rest of the site
+   uses, so the theme's own background is replaced rather than left beside it. */
+.doc pre.astro-code,
+.doc pre.astro-code span {
+  background: var(--term-bg) !important;
+}
+
+.doc pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  white-space: pre;
+}
+
+.doc blockquote {
+  margin: 0;
+  padding: 14px 18px;
+  border: 1px solid var(--term-rule);
+  border-left: 2px solid var(--green);
+  background: rgba(57, 255, 122, 0.04);
+  color: var(--term-light);
+}
+
+.doc blockquote > * + * {
+  margin-top: 8px;
+}
+
+.doc table {
+  border-collapse: collapse;
+  font-size: 14px;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+
+.doc th,
+.doc td {
+  border: 1px solid var(--term-rule);
+  padding: 8px 14px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.doc th {
+  color: var(--green);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.doc td code {
+  white-space: nowrap;
+}
+
+.doc hr {
+  margin-block: 14px;
+  border-top-color: var(--term-rule);
+}
+
+.doc kbd {
+  font-size: 0.85em;
+  color: var(--green);
+  border: 1px solid var(--term-edge);
+  border-bottom-width: 2px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+/* The lede under the title, which every page's frontmatter provides. */
+.doc__eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--term-dim);
+}
+
+.doc__lede {
+  font-size: 17px;
+  color: var(--term-light);
+  margin-top: 0;
+}
+
+.doc__ends {
+  display: flex;
+  gap: 20px;
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid var(--term-rule);
+  font-size: 14px;
+}
+
+.doc__end {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 45%;
+}
+
+.doc__end--next {
+  margin-left: auto;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.doc__end span {
+  font-size: 11px;
+  color: var(--term-dim);
+  font-family: var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

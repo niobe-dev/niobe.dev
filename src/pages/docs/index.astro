@@ -1,0 +1,127 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) Viacheslav Shynkarenko
+import Docs from "../../layouts/Docs.astro";
+import InstallCommand from "../../components/InstallCommand.astro";
+import { groupedDocs, docPath } from "../../lib/docs";
+import { site } from "../../lib/site";
+import "../../styles/prose.css";
+
+const groups = await groupedDocs();
+---
+
+<Docs
+  title="Documentation"
+  description="How to install Niobe, run a session, answer its permission prompts, read its cost figures and configure the backend it drives."
+  here="/docs"
+>
+  <div class="doc__eyebrow">Documentation</div>
+  <h1>Niobe</h1>
+  <p class="doc__lede">
+    A terminal coding agent that keeps you aware of what is being built and how. It drives
+    the official <code>claude</code> CLI as a subprocess, so a session runs on whatever that
+    binary is already signed in with.
+  </p>
+
+  <div class="start">
+    <InstallCommand variant="plain" />
+    <p class="start__note">
+      macOS and Linux, x86-64 and arm64. The installer checks the archive against its
+      published SHA-256 and puts <code>niobe</code> in <code>~/.local/bin</code>. Full
+      detail in <a href="/docs/installation">Installation</a>.
+    </p>
+  </div>
+
+  {
+    groups.map((group) => (
+      <section class="group">
+        <h2>{group.section}</h2>
+        <div class="group__grid">
+          {group.docs.map((doc) => (
+            <a class="entry" href={docPath(doc)}>
+              <b>{doc.data.title}</b>
+              <span>{doc.data.description}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    ))
+  }
+
+  <section class="group">
+    <h2>Elsewhere</h2>
+    <div class="group__grid">
+      <a class="entry" href={site.repoUrl} rel="noopener">
+        <b>Source ↗</b>
+        <span>The Rust workspace, its tests and the release workflow, under {site.license}.</span>
+      </a>
+      <a class="entry" href="/changelog">
+        <b>Changelog</b>
+        <span>Every published release, with its notes and the files it carries.</span>
+      </a>
+      <a class="entry" href={site.issuesUrl} rel="noopener">
+        <b>Issues ↗</b>
+        <span>Where a bug or a missing capability is reported.</span>
+      </a>
+    </div>
+  </section>
+</Docs>
+
+<style>
+  .start {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .start__note {
+    font-size: 14px;
+    color: var(--term-light);
+  }
+
+  .group {
+    margin-top: 44px;
+  }
+
+  .group h2 {
+    font-size: 15px;
+    font-family: var(--mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 14px;
+  }
+
+  .group__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 12px;
+  }
+
+  .entry {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 18px;
+    border: 1px solid var(--term-rule);
+    color: var(--term-fg);
+  }
+
+  .entry:hover {
+    border-color: var(--green);
+    color: var(--term-fg);
+    background: rgba(57, 255, 122, 0.04);
+  }
+
+  .entry b {
+    color: var(--term-white);
+    font-size: 15.5px;
+  }
+
+  .entry span {
+    font-size: 13.5px;
+    color: var(--term-light);
+    line-height: 1.5;
+  }
+</style>

@@ -1,0 +1,129 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) Viacheslav Shynkarenko
+import { site } from "../lib/site";
+
+interface Props {
+  /// `hero` is the boxed, glowing one under the headline; `plain` is the one
+  /// the docs and the closing panel use.
+  variant?: "hero" | "plain";
+  command?: string;
+}
+
+const { variant = "hero", command = site.install } = Astro.props;
+---
+
+<div class:list={["cmd", `cmd--${variant}`]}>
+  {variant === "hero" && <span class="cmd__scan" aria-hidden="true" />}
+  <code class="cmd__text"><span class="cmd__sigil">$</span>{command}</code>
+  <button class="cmd__copy" type="button" data-command={command}>
+    <span data-copy-label>Copy</span>
+  </button>
+</div>
+
+<style>
+  .cmd {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px 14px 20px;
+    background: #0b0f12;
+    border: 1px solid rgba(57, 255, 122, 0.6);
+    font-family: var(--mono);
+    font-size: clamp(12.5px, 1.6vw, 15px);
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .cmd--hero {
+    box-shadow: 0 0 30px rgba(57, 255, 122, 0.25);
+  }
+
+  .cmd--plain {
+    background: var(--term-bg);
+    border-color: var(--term-edge);
+  }
+
+  .cmd__text {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    min-width: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    color: var(--term-fg);
+  }
+
+  .cmd__text::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cmd__sigil {
+    color: var(--green);
+    flex: none;
+  }
+
+  .cmd__scan {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(transparent, rgba(57, 255, 122, 0.18), transparent);
+    animation: scan 3s linear infinite;
+  }
+
+  .cmd__copy {
+    margin-left: auto;
+    flex: none;
+    position: relative;
+    background: transparent;
+    border: 1px solid #2a3350;
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+
+  .cmd__copy:hover {
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .cmd__copy[data-copied] {
+    border-color: var(--green);
+    color: var(--green);
+  }
+</style>
+
+<script>
+  // The whole box is the target, so a mis-aimed click still copies.
+  for (const box of document.querySelectorAll<HTMLElement>(".cmd")) {
+    const button = box.querySelector<HTMLButtonElement>(".cmd__copy");
+    const label = box.querySelector<HTMLElement>("[data-copy-label]");
+    if (!button || !label) continue;
+
+    let restore: ReturnType<typeof setTimeout> | undefined;
+    const say = (text: string, copied: boolean) => {
+      label.textContent = text;
+      button.toggleAttribute("data-copied", copied);
+      clearTimeout(restore);
+      restore = setTimeout(() => {
+        label.textContent = "Copy";
+        button.removeAttribute("data-copied");
+      }, 1600);
+    };
+
+    box.addEventListener("click", async (event) => {
+      // A selection the reader made by hand is theirs to copy.
+      if (!window.getSelection()?.isCollapsed && event.target !== button) return;
+      try {
+        await navigator.clipboard.writeText(button.dataset.command ?? "");
+        say("Copied ✓", true);
+      } catch {
+        say("Copy failed", false);
+      }
+    });
+  }
+</script>

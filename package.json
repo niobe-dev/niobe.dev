@@ -1,0 +1,28 @@
+{
+  "name": "niobe.dev",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro build && wrangler dev",
+    "check": "tsc --noEmit -p worker/tsconfig.json",
+    "brand": "node scripts/generate-brand.mjs",
+    "fonts": "node scripts/fetch-fonts.mjs",
+    "deploy": "astro build && wrangler deploy"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.3.3",
+    "marked": "^18.0.13"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260919.1",
+    "@resvg/resvg-js": "^2.6.2",
+    "sharp": "^0.35.4",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.135.0"
+  }
+}

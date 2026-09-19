@@ -1,0 +1,427 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* Copyright (c) Viacheslav Shynkarenko */
+
+/* The palette is the shell's own: the greens and the magenta are the colours a
+   niobe session draws itself in, so the site and the tool look like one thing.
+   `--page` is the only token a page overrides — the docs sit on a greener
+   black than the landing page does. */
+:root {
+  --page: #07060d;
+  --fg: #dfe6ff;
+  --muted: #b7bfe0;
+  --dim: #9aa3c7;
+
+  --green: #39ff7a;
+  --pink: #ff2dc8;
+  --yellow: #ffe14d;
+
+  --term-bg: #020805;
+  --term-fg: #c9ffd6;
+  --term-white: #e9ffee;
+  --term-light: #8fe0a5;
+  --term-mid: #6fd68a;
+  --term-dim: #3c8a55;
+  --term-rule: #124a25;
+  --term-edge: #1f7a3a;
+
+  --rule: rgba(255, 255, 255, 0.08);
+  --panel: rgba(255, 255, 255, 0.03);
+
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: "Space Grotesk", system-ui, -apple-system, sans-serif;
+
+  --shell: 1280px;
+  --gutter: clamp(20px, 4vw, 40px);
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* The docs sidebar and the in-page anchors both sit under a sticky bar. */
+  scroll-padding-top: 88px;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--fg);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: var(--green);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--yellow);
+}
+
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+code,
+kbd,
+pre {
+  font-family: var(--mono);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 0;
+}
+
+.shell {
+  max-width: var(--shell);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  width: 100%;
+}
+
+.mono {
+  font-family: var(--mono);
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pink);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 20;
+  background: var(--green);
+  color: #021;
+  padding: 10px 18px;
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.skip-link:focus {
+  left: 12px;
+  top: 12px;
+  color: #021;
+}
+
+/* ── The mark ───────────────────────────────────────────────────────────── */
+
+.mark {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  background: linear-gradient(135deg, var(--green), var(--pink));
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+
+/* ── Chrome: the bar at the top and the rule at the bottom ──────────────── */
+
+.bar {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 3vw, 28px);
+  padding-block: 18px;
+  font-size: 14px;
+  flex-wrap: wrap;
+}
+
+.bar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  color: var(--fg);
+}
+
+.bar__links {
+  display: flex;
+  gap: clamp(14px, 2vw, 24px);
+  flex-wrap: wrap;
+}
+
+.bar__links a,
+.bar__out a {
+  color: var(--dim);
+}
+
+.bar__links a:hover,
+.bar__out a:hover,
+.bar__links a[aria-current] {
+  color: var(--fg);
+}
+
+.bar__out {
+  margin-left: auto;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+
+.bar__out a {
+  color: var(--fg);
+}
+
+.bar__cta {
+  padding: 8px 16px;
+  border: 1px solid var(--green);
+  color: var(--green);
+  font-family: var(--mono);
+  font-size: 12px;
+  box-shadow:
+    0 0 16px rgba(57, 255, 122, 0.35),
+    inset 0 0 16px rgba(57, 255, 122, 0.1);
+}
+
+.bar__cta:hover {
+  border-color: var(--yellow);
+  color: var(--yellow);
+  box-shadow: 0 0 16px rgba(255, 225, 77, 0.4);
+}
+
+.foot {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  gap: clamp(14px, 2vw, 24px);
+  padding-block: 24px;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+  color: var(--dim);
+  font-family: var(--mono);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.foot a {
+  color: var(--dim);
+}
+
+.foot a:hover {
+  color: var(--green);
+}
+
+.foot__end {
+  margin-left: auto;
+  color: var(--pink);
+}
+
+/* ── The background ─────────────────────────────────────────────────────── */
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.backdrop__grid {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(57, 255, 122, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57, 255, 122, 0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at 70% 15%, #000 25%, transparent 70%);
+  animation: gridDrift 6s linear infinite;
+}
+
+.backdrop__orb {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.backdrop__orb--pink {
+  top: -200px;
+  right: -100px;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(255, 45, 200, 0.22), transparent 60%);
+  animation: orbA 14s ease-in-out infinite;
+}
+
+.backdrop__orb--green {
+  top: 300px;
+  left: -200px;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(57, 255, 122, 0.16), transparent 60%);
+  animation: orbB 18s ease-in-out infinite;
+}
+
+.backdrop__orb--amber {
+  top: 1100px;
+  right: -150px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(255, 225, 77, 0.07), transparent 60%);
+  animation: pulse 9s ease-in-out infinite;
+}
+
+.backdrop__rain {
+  position: absolute;
+  inset: 0;
+  height: 1400px;
+  mask-image: linear-gradient(#000 40%, transparent);
+}
+
+.rain {
+  position: absolute;
+  top: 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: pre;
+  writing-mode: vertical-rl;
+  color: rgba(57, 255, 122, 0.3);
+  animation: rain linear infinite;
+}
+
+.rain--pink {
+  color: rgba(255, 45, 200, 0.35);
+}
+
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes gridDrift {
+  0% {
+    background-position:
+      0 0,
+      0 0;
+  }
+  100% {
+    background-position:
+      0 48px,
+      48px 0;
+  }
+}
+
+@keyframes orbA {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-80px, 60px) scale(1.15);
+  }
+}
+
+@keyframes orbB {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(90px, -50px) scale(1.1);
+  }
+}
+
+@keyframes rain {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .backdrop__rain {
+    display: none;
+  }
+}

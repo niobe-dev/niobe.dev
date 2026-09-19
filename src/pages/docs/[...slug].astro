@@ -1,0 +1,77 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) Viacheslav Shynkarenko
+import { render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import Docs from "../../layouts/Docs.astro";
+import Version from "../../components/Version.astro";
+import { orderedDocs, docPath, type Doc } from "../../lib/docs";
+import { latestRelease } from "../../lib/release";
+import "../../styles/prose.css";
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const docs = await orderedDocs();
+  return docs.map((doc, i) => ({
+    params: { slug: doc.id },
+    props: {
+      doc,
+      previous: docs[i - 1] ?? null,
+      next: docs[i + 1] ?? null,
+    },
+  }));
+};
+
+interface Props {
+  doc: Doc;
+  previous: Doc | null;
+  next: Doc | null;
+}
+
+const { doc, previous, next } = Astro.props;
+const { Content, headings } = await render(doc);
+const latest = await latestRelease();
+---
+
+<Docs
+  title={doc.data.title}
+  description={doc.data.description}
+  here={docPath(doc)}
+  headings={headings}
+>
+  <div class="doc__eyebrow">{doc.data.section}</div>
+  <h1>{doc.data.title}</h1>
+  <p class="doc__lede">{doc.data.description}</p>
+
+  <Content />
+
+  <nav class="doc__ends" aria-label="Pages">
+    {
+      previous && (
+        <a class="doc__end" href={docPath(previous)}>
+          <span>Previous</span>← {previous.data.title}
+        </a>
+      )
+    }
+    {
+      next && (
+        <a class="doc__end doc__end--next" href={docPath(next)}>
+          <span>Next</span>
+          {next.data.title} →
+        </a>
+      )
+    }
+  </nav>
+
+  <p class="doc__version">
+    This page describes <Version tag={latest?.tag ?? null} />.
+  </p>
+</Docs>
+
+<style>
+  .doc__version {
+    margin-top: 24px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--term-dim);
+  }
+</style>

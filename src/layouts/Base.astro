@@ -1,0 +1,81 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) Viacheslav Shynkarenko
+import "../styles/fonts.css";
+import "../styles/global.css";
+import { site } from "../lib/site";
+
+interface Props {
+  title: string;
+  description: string;
+  /// Appended to the site name in the tab, unless the page is the home page.
+  bare?: boolean;
+  /// Overrides `--page`, which is the only colour a page changes.
+  page?: string;
+  bodyClass?: string;
+}
+
+const { title, description, bare = false, page, bodyClass } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname.replace(/\/$/, "") || "/", site.origin);
+const tab = bare ? title : `${title} · ${site.name}`;
+const card = new URL("/og.png", site.origin);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{tab}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#07060d" />
+
+    <link
+      rel="preload"
+      href="/fonts/space-grotesk-700-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/jetbrains-mono-400-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={tab} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={card} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Niobe — AI coding at full speed. Without the black box."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link
+      rel="alternate"
+      type="application/atom+xml"
+      title={`${site.name} releases`}
+      href="/releases.xml"
+    />
+  </head>
+  <body class={bodyClass} style={page ? `--page: ${page}` : undefined}>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <slot />
+  </body>
+</html>

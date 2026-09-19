@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet"><style>body{margin:0;background:#050807;color:#c9ffd6;font-family:'Space Grotesk',system-ui,sans-serif}a{color:#39ff7a}a:hover{color:#ff2dc8}code{font-family:'JetBrains Mono',ui-monospace,monospace}</style></helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column">
+ <nav style="display:flex;align-items:center;gap:24px;padding:14px 32px;border-bottom:1px solid #124a25;font-size:14px;background:#030704;position:sticky;top:0;z-index:2">
+  <a href="./Niobe Landing Options.dc.html" style="display:flex;align-items:center;gap:10px;font-weight:700;color:#e9ffee;text-decoration:none;font-family:'JetBrains Mono',monospace"><span style="width:10px;height:10px;background:#39ff7a;box-shadow:0 0 12px #39ff7a"></span>niobe <span style="color:#3c8a55;font-weight:400">/ docs</span></a>
+  <div style="margin-left:auto;display:flex;gap:18px;color:#6fd68a"><span style="padding:5px 12px;border:1px solid #124a25;font-family:'JetBrains Mono',monospace;font-size:12px;color:#3c8a55">⌘K search docs</span><a href="#gh" style="color:#6fd68a;text-decoration:none">GitHub ↗</a><a href="#dc" style="color:#6fd68a;text-decoration:none">Discord ↗</a></div>
+ </nav>
+ <div style="display:grid;grid-template-columns:240px minmax(0,1fr) 200px;gap:48px;padding:40px 32px;max-width:1280px;width:100%;margin:0 auto;box-sizing:border-box;flex:1">
+  <aside style="font-size:13.5px;line-height:1.5;display:flex;flex-direction:column;gap:22px;position:sticky;top:90px;align-self:start">
+   <div style="display:flex;flex-direction:column;gap:6px"><div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;color:#39ff7a">GETTING STARTED</div><a href="#install" style="color:#e9ffee;text-decoration:none;padding:4px 10px;border-left:2px solid #39ff7a;background:rgba(57,255,122,.07)">Installation</a><a href="#auth" style="color:#8fe0a5;text-decoration:none;padding:4px 10px;border-left:2px solid transparent">Authentication</a><a href="#first" style="color:#8fe0a5;text-decoration:none;padding:4px 10px;border-left:2px solid transparent">Your first session</a><a href="#keys" style="color:#8fe0a5;text-decoration:none;padding:4px 10px;border-left:2px solid transparent">Keyboard reference</a></div>
+   <div style="display:flex;flex-direction:column;gap:6px"><div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;color:#39ff7a">GUIDES</div><a href="#cost" style="color:#8fe0a5;text-decoration:none;padding:4px 10px;border-left:2px solid transparent">Cost tracking &amp; budgets</a><a href="#parallel" style="color:#8fe0a5;text-decoration:none;padding:4px 10px;border-left:2px solid transparent">Parallel agents</a><a href="#decisions" style="color:#8fe0a5;text-decoration:none;padding:4px 10px;border-left:2px solid transparent">Decision log</a><a href="#tools" style="color:#8fe0a5;text-decoration:none;padding:4px 10px;border-left:2px solid transparent">Custom tools &amp; MCP</a></div>
+   <div style="display:flex;flex-direction:column;gap:6px"><div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;color:#39ff7a">REFERENCE</div><a href="#config" style="color:#8fe0a5;text-decoration:none;padding:4px 10px;border-left:2px solid transparent">niobe.toml</a><a href="#cli" style="color:#8fe0a5;text-decoration:none;padding:4px 10px;border-left:2px solid transparent">CLI flags</a><a href="#providers" style="color:#8fe0a5;text-decoration:none;padding:4px 10px;border-left:2px solid transparent">Providers</a></div>
+  </aside>
+  <main style="display:flex;flex-direction:column;gap:40px;min-width:0;line-height:1.65;font-size:15.5px">
+   <div style="display:flex;flex-direction:column;gap:12px"><div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#3c8a55">Getting started</div><h1 style="margin:0;font-size:44px;line-height:1.05;color:#e9ffee;letter-spacing:-.02em">Installation</h1><p style="margin:0;color:#8fe0a5;font-size:17px;text-wrap:pretty">Niobe is a single static binary. The installer detects your OS and architecture, verifies the checksum, and places <code>niobe</code> on your PATH.</p></div>
+   <section id="install" style="display:flex;flex-direction:column;gap:14px">
+    <h2 style="margin:0;font-size:24px;color:#e9ffee">Quick install</h2>
+    <p style="margin:0">macOS (Apple Silicon and Intel), Linux (x86_64, arm64) and Windows via WSL2.</p>
+    <div style="border:1px solid #1f7a3a;background:#020a05;font-family:'JetBrains Mono',monospace;font-size:14px;box-shadow:0 0 24px rgba(57,255,122,.1)"><div style="display:flex;padding:6px 14px;border-bottom:1px solid #124a25;font-size:11px;color:#3c8a55"><span>shell</span><span style="margin-left:auto">copy</span></div><div style="padding:14px 16px"><span style="color:#39ff7a">$</span> curl -fsSL https://niobe.dev/install.sh | sh</div></div>
+    <p style="margin:0;color:#8fe0a5;font-size:14px">Prefer to inspect first? <code style="color:#c9ffd6">curl -fsSL https://niobe.dev/install.sh -o install.sh</code> then read it — it's 80 lines.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:14px">
+     <div style="border:1px solid #124a25;padding:14px 16px;display:flex;flex-direction:column;gap:6px"><b style="color:#e9ffee">Pin a version</b><code style="color:#8fe0a5">NIOBE_VERSION=0.9.2 sh install.sh</code></div>
+     <div style="border:1px solid #124a25;padding:14px 16px;display:flex;flex-direction:column;gap:6px"><b style="color:#e9ffee">Custom install dir</b><code style="color:#8fe0a5">NIOBE_INSTALL=~/.local/bin sh install.sh</code></div>
+    </div>
+    <p style="margin:0">Verify: <code style="color:#c9ffd6">niobe --version</code> → <code style="color:#39ff7a">niobe 0.9.2 (neo)</code></p>
+   </section>
+   <section id="auth" style="display:flex;flex-direction:column;gap:14px">
+    <h2 style="margin:0;font-size:24px;color:#e9ffee">Authentication</h2>
+    <p style="margin:0">Niobe talks directly to the provider API with your key. Keys are stored in your OS keychain, never in the repo.</p>
+    <div style="border:1px solid #1f7a3a;background:#020a05;font-family:'JetBrains Mono',monospace;font-size:14px;line-height:1.9;padding:14px 16px"><div><span style="color:#39ff7a">$</span> niobe auth anthropic   <span style="color:#3c8a55"># or: openai, google</span></div><div><span style="color:#3c8a55">? Paste your API key:</span> ••••••••••••••••</div><div><span style="color:#39ff7a">✓</span> stored in keychain · default model: opus-5</div></div>
+    <p style="margin:0;font-size:14px;color:#8fe0a5">CI or containers: set <code style="color:#c9ffd6">ANTHROPIC_API_KEY</code>, <code style="color:#c9ffd6">OPENAI_API_KEY</code> or <code style="color:#c9ffd6">GOOGLE_API_KEY</code> instead.</p>
+   </section>
+   <section id="first" style="display:flex;flex-direction:column;gap:14px">
+    <h2 style="margin:0;font-size:24px;color:#e9ffee">Your first session</h2>
+    <p style="margin:0">Run <code style="color:#c9ffd6">niobe</code> inside a git repo. It indexes the tree, reads <code style="color:#c9ffd6">NIOBE.md</code> if present, and opens the TUI.</p>
+    <div style="border:1px solid #1f7a3a;background:#020a05;font-family:'JetBrains Mono',monospace;font-size:14px;line-height:1.9;padding:14px 16px"><div><span style="color:#39ff7a">$</span> cd my-project &amp;&amp; niobe</div><div><span style="color:#39ff7a">&gt;</span> add etag support to the catalog fetcher</div></div>
+    <ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;color:#c9ffd6"><li>Niobe reads the relevant files and posts a <b style="color:#e9ffee">plan</b> with its token estimate.</li><li>Edits show as inline diffs. In <b style="color:#e9ffee">auto mode</b> they apply immediately; press <code style="color:#39ff7a">shift+tab</code> to cycle to <b style="color:#e9ffee">confirm</b> or <b style="color:#e9ffee">plan-only</b>.</li><li>Tests run in the shell pane; the <b style="color:#e9ffee">Cost</b> panel updates per tool call.</li><li><code style="color:#39ff7a">F4</code> undoes the last edit group. <code style="color:#39ff7a">F10</code> quits and writes the session log to <code style="color:#c9ffd6">.niobe/sessions/</code>.</li></ol>
+   </section>
+   <section id="keys" style="display:flex;flex-direction:column;gap:14px">
+    <h2 style="margin:0;font-size:24px;color:#e9ffee">Keyboard reference</h2>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:#124a25;border:1px solid #124a25;font-size:14px;font-family:'JetBrains Mono',monospace">
+     <div style="background:#050807;padding:10px 14px;display:flex;gap:14px"><span style="color:#39ff7a;width:80px">F1</span><span>Help</span></div><div style="background:#050807;padding:10px 14px;display:flex;gap:14px"><span style="color:#39ff7a;width:80px">F2</span><span>Plan view</span></div>
+     <div style="background:#050807;padding:10px 14px;display:flex;gap:14px"><span style="color:#39ff7a;width:80px">F3</span><span>Diff</span></div><div style="background:#050807;padding:10px 14px;display:flex;gap:14px"><span style="color:#39ff7a;width:80px">F4</span><span>Undo</span></div>
+     <div style="background:#050807;padding:10px 14px;display:flex;gap:14px"><span style="color:#39ff7a;width:80px">F5</span><span>Cost</span></div><div style="background:#050807;padding:10px 14px;display:flex;gap:14px"><span style="color:#39ff7a;width:80px">F6</span><span>Files</span></div>
+     <div style="background:#050807;padding:10px 14px;display:flex;gap:14px"><span style="color:#39ff7a;width:80px">F7</span><span>Tools</span></div><div style="background:#050807;padding:10px 14px;display:flex;gap:14px"><span style="color:#39ff7a;width:80px">F8</span><span>Switch model</span></div>
+     <div style="background:#050807;padding:10px 14px;display:flex;gap:14px"><span style="color:#39ff7a;width:80px">F9</span><span>Theme</span></div><div style="background:#050807;padding:10px 14px;display:flex;gap:14px"><span style="color:#39ff7a;width:80px">shift+tab</span><span>Cycle mode</span></div>
+    </div>
+   </section>
+   <div style="display:flex;justify-content:space-between;padding-top:24px;border-top:1px solid #124a25;font-size:14px"><span></span><a href="#cost" style="text-decoration:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span style="font-size:11px;color:#3c8a55">Next</span><span>Cost tracking &amp; budgets →</span></a></div>
+  </main>
+  <aside style="font-size:13px;line-height:1.7;position:sticky;top:90px;align-self:start;display:flex;flex-direction:column;gap:6px;color:#6fd68a"><div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;color:#3c8a55;margin-bottom:4px">ON THIS PAGE</div><a href="#install" style="color:#e9ffee;text-decoration:none">Quick install</a><a href="#auth" style="color:#6fd68a;text-decoration:none">Authentication</a><a href="#first" style="color:#6fd68a;text-decoration:none">Your first session</a><a href="#keys" style="color:#6fd68a;text-decoration:none">Keyboard reference</a></aside>
+ </div>
+ <footer style="display:flex;gap:24px;padding:20px 32px;border-top:1px solid #124a25;font-size:12px;color:#3c8a55;font-family:'JetBrains Mono',monospace"><span style="color:#6fd68a">niobe.dev</span><span>MIT License</span><a href="#gh" style="color:#3c8a55">Edit this page on GitHub</a></footer>
+</div>
+</x-dc>
+</body>
+</html>

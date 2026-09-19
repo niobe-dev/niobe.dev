@@ -1,0 +1,44 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) Viacheslav Shynkarenko
+
+// The grid, the orbs and the falling glyphs behind the landing page.
+//
+// Every column is laid out here rather than in the browser: the positions come
+// from the index, so the markup is the same on every build and the page needs
+// no script to draw itself. `prefers-reduced-motion` hides the rain and stops
+// the rest; the page reads the same without any of it.
+
+const GLYPHS = ["0", "1", "etag", "304", "LRU", "◆", "$", "→", "⚙", "diff", "F8", "▸▸"];
+const COLUMNS = 14;
+
+const columns = Array.from({ length: COLUMNS }, (_, i) => ({
+  left: `${((i * 7.3 + 3) % 100).toFixed(1)}%`,
+  duration: `${14 + ((i * 3) % 11)}s`,
+  delay: `${(-(i * 2.7) % 14).toFixed(1)}s`,
+  pink: i % 5 === 0,
+  text: Array.from(
+    { length: 9 },
+    (_, k) => GLYPHS[(i * 3 + k * 5) % GLYPHS.length],
+  ).join(" "),
+}));
+---
+
+<div class="backdrop" aria-hidden="true">
+  <div class="backdrop__grid"></div>
+  <div class="backdrop__orb backdrop__orb--pink"></div>
+  <div class="backdrop__orb backdrop__orb--green"></div>
+  <div class="backdrop__orb backdrop__orb--amber"></div>
+  <div class="backdrop__rain">
+    {
+      columns.map((column) => (
+        <div
+          class:list={["rain", column.pink && "rain--pink"]}
+          style={`left:${column.left};animation-duration:${column.duration};animation-delay:${column.delay}`}
+        >
+          {column.text}
+        </div>
+      ))
+    }
+  </div>
+</div>

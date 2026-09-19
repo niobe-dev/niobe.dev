@@ -1,0 +1,298 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) Viacheslav Shynkarenko
+import { marked } from "marked";
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import { site } from "../lib/site";
+import { releases, readableDate } from "../lib/release";
+
+const published = await releases();
+
+// The notes are written by the project's own release workflow and maintainers,
+// in the same trust boundary as this page.
+marked.setOptions({ gfm: true, breaks: false });
+const rendered = await Promise.all(
+  published.map(async (release) => ({
+    release,
+    notes: release.notes.trim() ? await marked.parse(release.notes.trim()) : null,
+  })),
+);
+
+/// The archives, without the checksums that sit beside them.
+const archives = (assets: string[]) =>
+  assets.filter((name) => name.endsWith(".tar.gz"));
+---
+
+<Base
+  title="Changelog"
+  description={`Every published release of Niobe, with its notes, its date and the files it carries. Read live from the ${site.repo} releases.`}
+>
+  <div class="page">
+    <Nav section="changelog" />
+
+    <main id="main" class="shell">
+      <header class="head">
+        <div class="eyebrow">Releases</div>
+        <h1>Changelog</h1>
+        <p class="head__lede">
+          Every published release, read from GitHub when this page was built. Tagging{" "}
+          <code>v&lt;version&gt;</code> builds macOS and Linux binaries and publishes them with
+          their checksums and the installer, so{" "}
+          <code>releases/latest/download/install.sh</code> is always the script that matches
+          the archives beside it.
+        </p>
+        <p class="head__links">
+          <a href={site.releasesUrl} rel="noopener">All releases on GitHub ↗</a>
+          <a href="/releases.xml">Atom feed</a>
+        </p>
+      </header>
+
+      {
+        published.length === 0 ? (
+          <p class="empty">
+            The release list could not be read while this page was built.
+            <a href={site.releasesUrl} rel="noopener">
+              Read it on GitHub ↗
+            </a>
+          </p>
+        ) : (
+          <ol class="list">
+            {rendered.map(({ release, notes }, i) => (
+              <li class="entry" id={release.tag}>
+                <div class="entry__meta">
+                  <a class="entry__tag" href={release.url} rel="noopener">
+                    {release.tag}
+                  </a>
+                  <time datetime={release.publishedAt}>{readableDate(release.publishedAt)}</time>
+                  {i === 0 && <span class="entry__latest">latest</span>}
+                </div>
+                <div class="entry__main">
+                  <h2>{release.name}</h2>
+                  {notes ? (
+                    <div class="entry__notes" set:html={notes} />
+                  ) : (
+                    <p class="entry__notes entry__notes--none">No notes were published with this release.</p>
+                  )}
+                  {archives(release.assets).length > 0 && (
+                    <details class="entry__files">
+                      <summary>{archives(release.assets).length} archives, each with its SHA-256</summary>
+                      <ul>
+                        {archives(release.assets).map((name) => (
+                          <li>
+                            <a href={`${site.repoUrl}/releases/download/${release.tag}/${name}`} rel="noopener">
+                              {name}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                      <p class="entry__pin">
+                        Install exactly this one:{" "}
+                        <code>NIOBE_VERSION={release.tag} sh install.sh</code>
+                      </p>
+                    </details>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        )
+      }
+    </main>
+
+    <Footer />
+  </div>
+</Base>
+
+<style>
+  .page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  main {
+    flex: 1;
+    padding-bottom: 72px;
+  }
+
+  .head {
+    padding-block: clamp(36px, 6vw, 56px) 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .head h1 {
+    font-size: clamp(36px, 6vw, 56px);
+  }
+
+  .head__lede {
+    color: var(--muted);
+    max-width: 70ch;
+    line-height: 1.6;
+  }
+
+  .head__links {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    flex-wrap: wrap;
+  }
+
+  code {
+    font-size: 0.9em;
+    color: var(--term-fg);
+  }
+
+  .empty {
+    color: var(--muted);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .entry {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: clamp(16px, 4vw, 40px);
+    padding-block: 32px;
+    border-top: 1px solid var(--rule);
+    scroll-margin-top: 24px;
+  }
+
+  .entry:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .entry__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+
+  .entry__tag {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .entry__meta time {
+    color: var(--dim);
+  }
+
+  .entry__latest {
+    align-self: flex-start;
+    margin-top: 4px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #021;
+    background: var(--green);
+    padding: 1px 8px;
+  }
+
+  .entry__main {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .entry__main h2 {
+    font-size: 21px;
+  }
+
+  .entry__notes {
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .entry__notes--none {
+    color: var(--dim);
+    font-style: italic;
+  }
+
+  .entry__files {
+    font-size: 14px;
+    color: var(--dim);
+  }
+
+  .entry__files summary {
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 12.5px;
+  }
+
+  .entry__files ul {
+    margin: 10px 0 0;
+    padding-left: 20px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .entry__pin {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: baseline;
+    font-size: 13px;
+  }
+
+  @media (max-width: 720px) {
+    .entry {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .entry__meta {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 12px;
+    }
+  }
+</style>
+
+<style is:global>
+  .entry__notes :is(p, ul, ol) {
+    margin: 0;
+  }
+
+  .entry__notes > * + * {
+    margin-top: 10px;
+  }
+
+  .entry__notes ul,
+  .entry__notes ol {
+    padding-left: 20px;
+  }
+
+  .entry__notes code {
+    font-family: var(--mono);
+    font-size: 0.9em;
+    color: var(--term-fg);
+  }
+
+  .entry__notes h1,
+  .entry__notes h2,
+  .entry__notes h3 {
+    font-size: 16px;
+    color: var(--fg);
+    margin-top: 18px;
+  }
+</style>

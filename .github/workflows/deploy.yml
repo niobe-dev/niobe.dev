@@ -1,0 +1,80 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) Viacheslav Shynkarenko
+
+# Builds the site and puts it on Cloudflare.
+#
+# A push to main deploys. A pull request builds and type-checks without
+# deploying, so a broken page cannot be merged. The schedule exists because the
+# built pages name a version: the site is rebuilt every few hours so that a
+# release published in the product repository reaches the static HTML without
+# anyone touching this one. Between rebuilds the worker's /api/release keeps
+# the version on the page correct anyway.
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Six-hourly, off the hour, to sit away from the crowd at :00.
+    - cron: "17 2,8,14,20 * * *"
+  workflow_dispatch:
+
+# One deploy at a time, and a newer commit wins: a queued older build finishing
+# last would put the older site live.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type-check the worker
+        run: npm run check
+
+      - name: Build
+        # `astro build` compiles every page and every component, so a broken
+        # template fails here rather than in someone's browser. It also reads
+        # the product repository's releases to bake today's version into the
+        # pages; the token lifts the rate limit, and without it the build still
+        # succeeds and the browser fills the version in.
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: npm run build
+
+      - name: Deploy
+        if: github.event_name != 'pull_request'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+
+      - name: Check what is live
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          # Cloudflare propagates in seconds; give it a moment before asking.
+          sleep 10
+          echo "— the home page"
+          curl -fsS -o /dev/null -w '%{http_code} %{url_effective}\n' https://niobe.dev/
+          echo "— the installer"
+          curl -fsS https://niobe.dev/install.sh | tail -1
+          echo "— the latest release"
+          curl -fsS https://niobe.dev/api/release

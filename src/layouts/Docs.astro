@@ -1,0 +1,305 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) Viacheslav Shynkarenko
+import Base from "./Base.astro";
+import { site } from "../lib/site";
+import { groupedDocs, docPath } from "../lib/docs";
+import type { MarkdownHeading } from "astro";
+
+interface Props {
+  title: string;
+  description: string;
+  /// The page's own path, so the sidebar can mark where the reader is.
+  here: string;
+  /// `## ` headings, for the column on the right. Omitted on the index.
+  headings?: MarkdownHeading[];
+}
+
+const { title, description, here, headings = [] } = Astro.props;
+
+const groups = await groupedDocs();
+const onThisPage = headings.filter((heading) => heading.depth === 2);
+---
+
+<Base title={title} description={description} page="#050807" bodyClass="docs">
+  <div class="frame">
+    <nav class="docbar" aria-label="Main">
+      <a class="docbar__brand" href="/">
+        <span class="docbar__mark"></span>niobe <span class="docbar__slash">/ docs</span>
+      </a>
+      <div class="docbar__out">
+        <a href="/changelog">Changelog</a>
+        <a href={site.repoUrl} rel="noopener">GitHub ↗</a>
+        <a href={site.issuesUrl} rel="noopener">Issues ↗</a>
+      </div>
+    </nav>
+
+    <div class="grid shell">
+      <aside class="side" aria-label="Documentation">
+        {
+          groups.map((group) => (
+            <div class="side__group">
+              <div class="side__title">{group.section}</div>
+              {group.docs.map((doc) => (
+                <a
+                  class:list={["side__link", docPath(doc) === here && "side__link--here"]}
+                  href={docPath(doc)}
+                  aria-current={docPath(doc) === here ? "page" : undefined}
+                >
+                  {doc.data.title}
+                </a>
+              ))}
+            </div>
+          ))
+        }
+      </aside>
+
+      <main id="main" class="doc">
+        <slot />
+      </main>
+
+      <aside class="toc" aria-label="On this page">
+        {
+          onThisPage.length > 0 && (
+            <>
+              <div class="toc__title">On this page</div>
+              {onThisPage.map((heading) => (
+                <a href={`#${heading.slug}`}>{heading.text}</a>
+              ))}
+            </>
+          )
+        }
+      </aside>
+    </div>
+
+    <footer class="docfoot">
+      <span>{site.domain}</span>
+      <span>{site.license}</span>
+      <a href={site.repoUrl} rel="noopener">GitHub</a>
+      <a href={`${site.siteRepoUrl}/edit/main/src/content${here.replace("/docs", "/docs")}.md`}>
+        Edit this page
+      </a>
+    </footer>
+  </div>
+</Base>
+
+<script>
+  // Every heading already carries an id. This makes it linkable without
+  // putting a glyph in the markdown, and a reader without JavaScript loses
+  // only the convenience of clicking it.
+  for (const heading of document.querySelectorAll<HTMLElement>(".doc h2[id], .doc h3[id]")) {
+    const anchor = document.createElement("a");
+    anchor.className = "doc__anchor";
+    anchor.href = `#${heading.id}`;
+    anchor.textContent = "#";
+    anchor.setAttribute("aria-label", `Link to ${heading.textContent?.trim()}`);
+    heading.append(anchor);
+  }
+</script>
+
+<style is:global>
+  body.docs {
+    color: var(--term-fg);
+  }
+
+  body.docs a {
+    color: var(--green);
+  }
+
+  body.docs a:hover {
+    color: var(--pink);
+  }
+</style>
+
+<style>
+  .frame {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Bar ──────────────────────────────────────────────────────────────── */
+
+  .docbar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 14px clamp(20px, 4vw, 32px);
+    border-bottom: 1px solid var(--term-rule);
+    font-size: 14px;
+    background: #030704;
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    flex-wrap: wrap;
+  }
+
+  .docbar__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    color: var(--term-white);
+    font-family: var(--mono);
+  }
+
+  .docbar__brand:hover {
+    color: var(--term-white);
+  }
+
+  .docbar__mark {
+    width: 10px;
+    height: 10px;
+    background: linear-gradient(135deg, var(--green), var(--pink));
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  }
+
+  .docbar__slash {
+    color: var(--term-dim);
+    font-weight: 400;
+  }
+
+  .docbar__out {
+    margin-left: auto;
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .docbar__out a {
+    color: var(--term-mid);
+  }
+
+  .docbar__out a:hover {
+    color: var(--term-white);
+  }
+
+  /* ── Grid ─────────────────────────────────────────────────────────────── */
+
+  .grid {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr) 190px;
+    gap: clamp(28px, 4vw, 48px);
+    padding-block: 40px;
+    flex: 1;
+    align-items: start;
+  }
+
+  .side {
+    font-size: 13.5px;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    position: sticky;
+    top: 88px;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+  }
+
+  .side__group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .side__title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 2px;
+  }
+
+  .side__link {
+    color: var(--term-light);
+    padding: 4px 10px;
+    border-left: 2px solid transparent;
+  }
+
+  .side__link:hover {
+    color: var(--term-white);
+    border-left-color: var(--term-edge);
+  }
+
+  .side__link--here {
+    color: var(--term-white);
+    border-left-color: var(--green);
+    background: rgba(57, 255, 122, 0.07);
+  }
+
+  .side__link--here:hover {
+    color: var(--term-white);
+  }
+
+  .toc {
+    font-size: 13px;
+    line-height: 1.7;
+    position: sticky;
+    top: 88px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .toc__title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--term-dim);
+    margin-bottom: 4px;
+  }
+
+  .toc a {
+    color: var(--term-mid);
+  }
+
+  .toc a:hover {
+    color: var(--term-white);
+  }
+
+  .docfoot {
+    display: flex;
+    gap: 24px;
+    padding: 20px clamp(20px, 4vw, 32px);
+    border-top: 1px solid var(--term-rule);
+    font-size: 12px;
+    color: var(--term-dim);
+    font-family: var(--mono);
+    flex-wrap: wrap;
+  }
+
+  .docfoot a {
+    color: var(--term-dim);
+  }
+
+  .docfoot a:hover {
+    color: var(--green);
+  }
+
+  @media (max-width: 1100px) {
+    .grid {
+      grid-template-columns: 200px minmax(0, 1fr);
+    }
+
+    .toc {
+      display: none;
+    }
+  }
+
+  @media (max-width: 800px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 28px;
+    }
+
+    .side {
+      position: static;
+      max-height: none;
+      border-bottom: 1px solid var(--term-rule);
+      padding-bottom: 24px;
+    }
+  }
+</style>
