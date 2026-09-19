@@ -78,3 +78,5 @@ jobs:
           curl -fsS https://niobe.dev/install.sh | tail -1
           echo "— the latest release"
           curl -fsS https://niobe.dev/api/release
+          echo "— www redirects to the apex"
+          curl -fsS -o /dev/null -w '%{http_code} -> %{redirect_url}\n' https://www.niobe.dev/docs

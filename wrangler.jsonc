@@ -32,5 +32,12 @@
     ]
   },
   "observability": { "enabled": true },
-  "routes": [{ "pattern": "niobe.dev", "custom_domain": true }]
+  "routes": [
+    { "pattern": "niobe.dev", "custom_domain": true },
+    // www is a route rather than a custom domain: the hostname already has a
+    // DNS record of its own, and a custom domain refuses to replace one. A
+    // route puts the worker in front of whatever that record points at, which
+    // is all the redirect needs.
+    { "pattern": "www.niobe.dev/*", "zone_name": "niobe.dev" }
+  ]
 }

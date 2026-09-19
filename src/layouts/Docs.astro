@@ -13,9 +13,13 @@ interface Props {
   here: string;
   /// `## ` headings, for the column on the right. Omitted on the index.
   headings?: MarkdownHeading[];
+  /// The markdown file behind this page, relative to `src/content/`. The index
+  /// has none, and shows no edit link rather than one to a file that is not
+  /// there.
+  source?: string;
 }
 
-const { title, description, here, headings = [] } = Astro.props;
+const { title, description, here, headings = [], source } = Astro.props;
 
 const groups = await groupedDocs();
 const onThisPage = headings.filter((heading) => heading.depth === 2);
@@ -76,9 +80,11 @@ const onThisPage = headings.filter((heading) => heading.depth === 2);
       <span>{site.domain}</span>
       <span>{site.license}</span>
       <a href={site.repoUrl} rel="noopener">GitHub</a>
-      <a href={`${site.siteRepoUrl}/edit/main/src/content${here.replace("/docs", "/docs")}.md`}>
-        Edit this page
-      </a>
+      {
+        source && (
+          <a href={`${site.siteRepoUrl}/edit/main/src/content/${source}`}>Edit this page</a>
+        )
+      }
     </footer>
   </div>
 </Base>

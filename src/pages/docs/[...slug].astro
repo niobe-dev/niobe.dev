@@ -37,6 +37,7 @@ const latest = await latestRelease();
   description={doc.data.description}
   here={docPath(doc)}
   headings={headings}
+  source={`docs/${doc.id}.md`}
 >
   <div class="doc__eyebrow">{doc.data.section}</div>
   <h1>{doc.data.title}</h1>
