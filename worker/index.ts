@@ -3,14 +3,18 @@
 
 // The worker in front of the built site.
 //
-// It does the two things a static file cannot: it serves `/install.sh`, so the
-// short install command on the page is the release's own installer, and it
+// It does the three things a static file cannot: it serves `/install.sh`, so
+// the short install command on the page is the release's own installer; it
 // answers `/api/release`, so a page built a month ago still names today's
-// version. Everything else is a file, served by the asset store without the
-// worker running at all — `assets.run_worker_first` in `wrangler.jsonc` names
-// these two paths and nothing else. Security headers and the `www` redirect
-// belong to the asset store too, in `public/_headers` and `public/_redirects`.
+// version; and it sends `www` to the apex, which a `_redirects` file cannot do
+// because Workers takes only relative URLs there.
+//
+// Everything else it hands straight to the asset store, and the fingerprinted
+// files never reach it at all — `assets.run_worker_first` in `wrangler.jsonc`
+// excludes them. The security headers are the asset store's, in
+// `public/_headers`, so they also cover what the worker never sees.
 
+const SITE = "niobe.dev";
 const REPO = "niobe-dev/niobe";
 const RELEASES = `https://github.com/${REPO}/releases`;
 
@@ -26,13 +30,19 @@ interface Env {
 
 export default {
   async fetch(request, env, ctx): Promise<Response> {
-    const { pathname } = new URL(request.url);
+    const url = new URL(request.url);
 
-    if (pathname === "/install.sh") return installer(request, ctx);
-    if (pathname === "/api/release") return latestRelease(request, ctx);
+    // One name for the site, so a page is not indexed twice under two
+    // hostnames. The path and the query are kept.
+    if (url.hostname === `www.${SITE}`) {
+      url.hostname = SITE;
+      return Response.redirect(url.toString(), 301);
+    }
 
-    // Anything else only reaches the worker when no file matches it, and the
-    // asset store is also what serves the 404 page.
+    if (url.pathname === "/install.sh") return installer(request, ctx);
+    if (url.pathname === "/api/release") return latestRelease(request, ctx);
+
+    // A file, or the 404 page when there is none.
     return env.ASSETS.fetch(request);
   },
 } satisfies ExportedHandler<Env>;
@@ -135,7 +145,7 @@ async function latestRelease(request: Request, ctx: ExecutionContext): Promise<R
     tag,
     version: tag.replace(/^v/, ""),
     url: `${RELEASES}/tag/${tag}`,
-    install: "curl -fsSL https://niobe.dev/install.sh | sh",
+    install: `curl -fsSL https://${SITE}/install.sh | sh`,
   };
 
   const response = new Response(JSON.stringify(body, null, 2), {

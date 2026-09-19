@@ -10,15 +10,27 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    "html_handling": "auto-trailing-slash",
+    // The pages link to `/docs/installation`, so that is the URL that
+    // serves a page; the trailing-slash form redirects to it. The default
+    // would redirect the other way and put a hop in front of every link.
+    "html_handling": "drop-trailing-slash",
     "not_found_handling": "404-page",
-    // Every request runs the worker first, so `/install.sh` and `/api/*` can be
-    // answered before the asset store is consulted.
-    "run_worker_first": ["/install.sh", "/api/*"]
+    // The worker sees every request except the fingerprinted files, which are
+    // served straight from the edge. It needs the document requests to send
+    // `www` to the apex — Workers' `_redirects` takes relative URLs only, so a
+    // redirect between hostnames cannot live there.
+    "run_worker_first": [
+      "/*",
+      "!/_astro/*",
+      "!/fonts/*",
+      "!/og.png",
+      "!/icon-192.png",
+      "!/icon-512.png",
+      "!/apple-touch-icon.png",
+      "!/favicon.svg",
+      "!/favicon.ico"
+    ]
   },
   "observability": { "enabled": true },
-  "routes": [
-    { "pattern": "niobe.dev", "custom_domain": true },
-    { "pattern": "www.niobe.dev", "custom_domain": true }
-  ]
+  "routes": [{ "pattern": "niobe.dev", "custom_domain": true }]
 }

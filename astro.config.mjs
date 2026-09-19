@@ -11,7 +11,7 @@ import sitemap from "@astrojs/sitemap";
 export default defineConfig({
   site: "https://niobe.dev",
   output: "static",
-  trailingSlash: "ignore",
+  trailingSlash: "never",
   integrations: [sitemap({ filter: (page) => !page.includes("/404") })],
   build: { format: "directory", inlineStylesheets: "never" },
   // Nothing is inlined into the HTML, so the site can be served under a
